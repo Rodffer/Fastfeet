@@ -7,7 +7,7 @@ class RecipientController {
     const schema = Yup.object().shape({
       name: Yup.string().required(),
       address_line_1: Yup.string().required(),
-      number: Yup.integer().required(),
+      number: Yup.string().required(),
       address_line_2: Yup.string().required(),
       state: Yup.string().required(),
       city: Yup.string().required(),
@@ -45,7 +45,7 @@ class RecipientController {
     const schema = Yup.object().shape({
       name: Yup.string(),
       address_line_1: Yup.string().required(),
-      number: Yup.integer().required(),
+      number: Yup.string().required(),
       address_line_2: Yup.string().required(),
       state: Yup.string().required(),
       city: Yup.string().required(),

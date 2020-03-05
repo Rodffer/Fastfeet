@@ -6,11 +6,11 @@ class Recipient extends Model {
       {
         name: Sequelize.STRING,
         address_line_1: Sequelize.STRING,
-        number: Sequelize.INTEGER,
+        number: Sequelize.STRING,
         address_line_2: Sequelize.STRING,
         state: Sequelize.STRING,
         city: Sequelize.STRING,
-        zip: Sequelize.INTEGER,
+        zip: Sequelize.STRING,
       },
       {
         sequelize,
