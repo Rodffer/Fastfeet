@@ -43,6 +43,7 @@ class RecipientController {
 
   async update(req, res) {
     const schema = Yup.object().shape({
+      id: Yup.number().required(),
       name: Yup.string(),
       address_line_1: Yup.string().required(),
       number: Yup.string().required(),
@@ -53,13 +54,19 @@ class RecipientController {
     });
 
     if (!(await schema.isValid(req.body))) {
-      return res.status(400).json({ error: 'Recipient Update fail' });
+      return res.status(400).json({ error: 'Recipients fails' });
     }
 
-    const recipient = await Recipient.findByPk(req.userId);
+    const { id } = req.body;
+
+    const recipientExists = await Recipient.findByPk(id);
+
+    if (!recipientExists)
+      res.status(400).json({ error: 'Recipient not found.' });
+
+    const recipient = await Recipient.findOne({ where: { id } });
 
     const {
-      id,
       name,
       address_line_1,
       number,
@@ -70,7 +77,6 @@ class RecipientController {
     } = await recipient.update(req.body);
 
     return res.json({
-      id,
       name,
       address_line_1,
       number,
