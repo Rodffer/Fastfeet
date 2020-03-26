@@ -1,2 +1,5 @@
-/node_modules
-/.vscode
+backend/node_modules/
+backend/.vscode/
+backend/.env
+
+backend/tmp/uploads/*
