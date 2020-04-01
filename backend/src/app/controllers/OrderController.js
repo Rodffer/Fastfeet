@@ -1,36 +1,48 @@
 import * as Yup from 'yup';
 
 import Order from '../models/Order';
+import Deliveryman from '../models/Deliveryman';
+import Recipient from '../models/Recipient';
 import File from '../models/File';
 
 class OrderController {
   async store(req, res) {
     const schema = Yup.object().shape({
       product: Yup.string().required(),
+      deliveryman_id: Yup.number().required(),
+      recipient_id: Yup.number().required(),
     });
 
     if (!(await schema.isValid(req.body))) {
-      return res.status(400).json({ error: 'Validation fails' });
+      return res.status(400).json({ error: 'Validations fails' });
     }
 
-    const orderExists = await Order.findOne({
-      where: { id: req.body.id },
+    const deliverymanExists = await Deliveryman.findOne({
+      where: { id: req.body.deliveryman_id },
     });
 
-    if (orderExists) {
-      return res.status(400).json({ error: 'Order already exists.' });
+    if (!deliverymanExists) {
+      return res.status(400).json({ error: ' Deliveryman does not exists' });
     }
-    const { product } = await Order.create(req.body);
 
-    return res.json({
-      product,
+    const recipientExists = await Recipient.findOne({
+      where: { id: req.body.recipient_id },
     });
+
+    if (!recipientExists) {
+      return res.status(400).json({ error: ' Recipient does not exists' });
+    }
+
+    const order = await Order.create(req.body);
+
+    return res.json(order);
   }
 
   async update(req, res) {
     const schema = Yup.object().shape({
-      name: Yup.string(),
-      email: Yup.string().email(),
+      product: Yup.string(),
+      recipient_id: Yup.number(),
+      deliveryman_id: Yup.number(),
     });
 
     if (!(await schema.isValid(req.body))) {
@@ -38,66 +50,71 @@ class OrderController {
     }
 
     const { id } = req.params;
-    const { name, email } = req.body;
+    const {
+      product,
+      recipient_id,
+      deliveryman_id,
+      signature_id,
+      canceled_at,
+      start_date,
+      end_date,
+    } = req.body;
 
-    const deliverymanExists = await Deliveryman.findByPk(id);
+    const orderExists = await Order.findByPk(id);
 
-    if (!deliverymanExists) {
-      return res.status(400).json({ error: 'Deliveryman does not exist.' });
+    if (!orderExists) {
+      return res.status(400).json({ error: ' Order does not exists' });
     }
 
-    if (email) {
-      const emailExists = await Deliveryman.findOne({
-        where: { email },
-      });
-      if (emailExists) {
-        return res.status(400).json({ error: 'Email already exists' });
-      }
-      deliverymanExists.email = email;
-    }
-
-    if (name) {
-      deliverymanExists.name = name;
-    }
-
-    await deliverymanExists.update(req.body);
+    await orderExists.update(req.body);
 
     return res.json({
-      id,
-      name,
-      email,
+      product,
+      recipient_id,
+      deliveryman_id,
+      signature_id,
+      canceled_at,
+      start_date,
+      end_date,
     });
   }
 
   async index(req, res) {
-    const deliveryman = await Deliveryman.findAll({
-      attributes: ['id', 'name', 'email', 'avatar_id'],
+    const orders = await Order.findAll({
+      attributes: [
+        'id',
+        'product',
+        'start_date',
+        'end_date',
+        'recipient_id',
+        'deliveryman_id',
+        'signature_id',
+      ],
       include: [
         {
           model: File,
-          as: 'avatar',
+          as: 'signature',
           attributes: ['name', 'path', 'url'],
         },
       ],
     });
-
-    return res.json(deliveryman);
+    return res.json(orders);
   }
 
   async delete(req, res) {
-    const deliveryman = await Deliveryman.findByPk(req.params.id);
+    const orderExists = await Order.findByPk(req.params.id);
 
-    if (!deliveryman) {
-      return res.status(400).json({ message: 'Deliveryman does not exist.' });
+    if (!orderExists) {
+      return res.status(400).json({ message: 'Order does not exist.' });
     }
 
-    await Deliveryman.destroy({
+    await Order.destroy({
       where: {
         id: req.params.id,
       },
     });
 
-    return res.json({ message: 'Deliveryman Deleted' });
+    return res.json({ message: 'Order Deleted' });
   }
 }
 
